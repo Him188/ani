@@ -171,7 +171,7 @@ private class TorrentVideoSource(
 ) : VideoSource<TorrentVideoData>, KoinComponent {
     @OptIn(ExperimentalStdlibApi::class)
     override val uri: String by lazy {
-        "torrent://${encodedTorrentInfo.data.toHexString()}"
+        "torrent://${encodedTorrentInfo.data.toHexString().take(32) + "..."}"
     }
 
     @Throws(VideoSourceOpenException::class)
