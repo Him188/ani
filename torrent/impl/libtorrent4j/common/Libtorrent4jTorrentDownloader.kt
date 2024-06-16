@@ -13,7 +13,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import me.him188.ani.app.torrent.api.DefaultTorrentDownloadSession
 import me.him188.ani.app.torrent.api.FetchTorrentTimeoutException
 import me.him188.ani.app.torrent.api.HttpFileDownloader
 import me.him188.ani.app.torrent.api.TorrentDownloadSession
@@ -23,6 +22,7 @@ import me.him188.ani.app.torrent.api.TorrentLibInfo
 import me.him188.ani.app.torrent.api.files.EncodedTorrentInfo
 import me.him188.ani.app.torrent.api.files.TorrentInfo
 import me.him188.ani.app.torrent.api.handle.TorrentThread
+import me.him188.ani.app.torrent.libtorrent4j.DefaultTorrentDownloadSession.Companion.FAST_RESUME_FILENAME
 import me.him188.ani.app.torrent.libtorrent4j.files.Torrent4jTorrentInfo
 import me.him188.ani.utils.logging.debug
 import me.him188.ani.utils.logging.error
@@ -51,10 +51,6 @@ abstract class AbstractLockedTorrentDownloader<Info : TorrentInfo>(
     private val isDebug: Boolean,
     parentCoroutineContext: CoroutineContext,
 ) : TorrentDownloader {
-    companion object {
-        const val FAST_RESUME_FILENAME = "fastresume"
-    }
-
     private val scope = CoroutineScope(parentCoroutineContext + SupervisorJob(parentCoroutineContext[Job]))
 
     private val logger = logger(this::class)

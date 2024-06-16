@@ -1,4 +1,4 @@
-package me.him188.ani.app.torrent.api
+package me.him188.ani.app.torrent.libtorrent4j
 
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastFirstOrNull
@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import me.him188.ani.app.torrent.api.TorrentDownloadSession
+import me.him188.ani.app.torrent.api.TorrentDownloadState
 import me.him188.ani.app.torrent.api.files.AbstractTorrentFileEntry
 import me.him188.ani.app.torrent.api.files.DownloadStats
 import me.him188.ani.app.torrent.api.files.FilePriority
@@ -44,7 +46,6 @@ import me.him188.ani.app.torrent.api.pieces.TorrentDownloadController
 import me.him188.ani.app.torrent.api.pieces.lastIndex
 import me.him188.ani.app.torrent.api.pieces.startIndex
 import me.him188.ani.app.torrent.io.TorrentInput
-import me.him188.ani.app.torrent.libtorrent4j.AbstractLockedTorrentDownloader.Companion.FAST_RESUME_FILENAME
 import me.him188.ani.utils.coroutines.flows.resetStale
 import me.him188.ani.utils.io.SeekableInput
 import me.him188.ani.utils.logging.debug
@@ -71,6 +72,10 @@ open class DefaultTorrentDownloadSession(
     private val isDebug: Boolean,
     parentCoroutineContext: CoroutineContext = EmptyCoroutineContext,
 ) : TorrentDownloadSession {
+    companion object {
+        const val FAST_RESUME_FILENAME = "fastresume"
+    }
+
     private val sessionScope = CoroutineScope(parentCoroutineContext + SupervisorJob(parentCoroutineContext[Job]))
     private val coroutineCloseHandle =
         parentCoroutineContext[Job]?.invokeOnCompletion {
@@ -419,6 +424,7 @@ open class DefaultTorrentDownloadSession(
                     logger.info { "[$torrentName] Save resume data, buf length = ${buf.size}" }
                     val file = saveDirectory.resolve(FAST_RESUME_FILENAME)
                     file.writeBytes(buf)
+                    logger.info { "[$torrentName] Resume data saved" }
                 }
 
                 // TODO: torrent peer stats 
