@@ -69,7 +69,7 @@ class DefaultTorrentManager(
         // 如果要支持多个, 需要考虑将所有 storage 合并成一个 MediaSource.
 
         when (Platform.currentPlatform) {
-            is Platform.Desktop -> listOf(qBittorrent)
+            is Platform.Desktop -> listOf(libtorrent4j)
             Platform.Android -> listOf(libtorrent4j)
         }
     }

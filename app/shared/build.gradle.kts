@@ -129,6 +129,8 @@ kotlin {
         implementation(libs.reorderable)
         implementation(libs.constraintlayout.compose)
 
+        implementation(libs.jna)
+
         implementation(libs.slf4j.api)
     }
 
@@ -263,9 +265,14 @@ kotlin {
         submodule("torrent/api")
         submodule("torrent/impl/libtorrent4j")
         submodule("torrent/impl/qbittorrent")
+        submodule("torrent/impl/anitorrent")
 
         submodule("app/shared/placeholder")
         submodule("app/shared/video-player")
+
+        commonMain {
+            kotlin.srcDirs(rootProject.projectDir.resolve("torrent/anitorrent/java"))
+        }
     }
 
 
