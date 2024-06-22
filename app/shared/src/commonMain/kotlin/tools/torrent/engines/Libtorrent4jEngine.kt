@@ -10,12 +10,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import me.him188.ani.app.platform.Platform.Companion.currentPlatform
 import me.him188.ani.app.platform.currentAniBuildConfig
 import me.him188.ani.app.platform.getAniUserAgent
-import me.him188.ani.app.platform.isAarch64
-import me.him188.ani.app.platform.isAndroid
-import me.him188.ani.app.platform.isMobile
 import me.him188.ani.app.platform.versionCode
 import me.him188.ani.app.tools.torrent.AbstractTorrentEngine
 import me.him188.ani.app.tools.torrent.TorrentEngineConfig
@@ -30,7 +26,7 @@ import java.io.File
 
 @Serializable
 class Libtorrent4jConfig(
-    override val enabled: Boolean = currentPlatform.isMobile(),
+    override val enabled: Boolean = true,
     @Transient val placeholder: Int = 0,
 ) : TorrentEngineConfig {
     companion object {
@@ -50,7 +46,7 @@ class Libtorrent4jEngine(
 ) {
     override val location: MediaSourceLocation get() = MediaSourceLocation.Local
     override val isSupported: Flow<Boolean>
-        get() = flowOf(currentPlatform.isAndroid() && currentPlatform.isAarch64())
+        get() = flowOf(true)
     override val isEnabled: Flow<Boolean> get() = config.map { it.enabled }
     override suspend fun testConnection(): Boolean = true
 

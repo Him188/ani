@@ -1,6 +1,6 @@
 [versions]
 bencode = "1.4.1"
-jna = "5.12.1"
+jna = "5.13.0"
 kotlin = "2.0.0"
 coroutines = "1.8.1"
 kotlinpoet = "1.16.0"
