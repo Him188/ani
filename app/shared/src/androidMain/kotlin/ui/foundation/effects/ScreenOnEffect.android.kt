@@ -3,7 +3,6 @@ package me.him188.ani.app.ui.foundation.effects
 import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import me.him188.ani.app.platform.LocalContext
 
 /**
@@ -13,7 +12,8 @@ import me.him188.ani.app.platform.LocalContext
  */
 @Composable
 actual fun ScreenOnEffectImpl() {
-    val activity = LocalContext.current as? Activity ?: LocalLifecycleOwner.current as? Activity
+    val activity =
+        LocalContext.current as? Activity ?: androidx.lifecycle.compose.LocalLifecycleOwner.current as? Activity
     DisposableEffect(activity?.window) {
         val window = activity?.window
         window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

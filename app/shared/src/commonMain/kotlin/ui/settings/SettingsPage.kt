@@ -12,7 +12,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -104,13 +104,15 @@ fun SettingsPage(
 
         // Pager with TabRow
         Column(Modifier.padding(topBarPaddings).fillMaxSize()) {
-            SecondaryScrollableTabRow(
+            ScrollableTabRow(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = @Composable { tabPositions ->
                     TabRowDefaults.SecondaryIndicator(
                         Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                     )
                 },
+                contentColor = TabRowDefaults.secondaryContentColor,
+                containerColor = TabRowDefaults.secondaryContainerColor,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 val tabs by remember {

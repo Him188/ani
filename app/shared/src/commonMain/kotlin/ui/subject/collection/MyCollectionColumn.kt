@@ -129,7 +129,7 @@ fun SubjectCollectionsColumn(
         ),
     ) {
         items(data.orEmpty(), key = { it.subjectId }) { collection ->
-            Box(Modifier.ifThen(enableAnimation) { animateItemPlacement() }) {
+            Box(Modifier.ifThen(enableAnimation) { animateItem() }) {
                 item(collection)
             }
         }
