@@ -85,7 +85,7 @@ fun MediaSelectorView(
                 }
                 Surface(
 //                    tonalElevation = if (isStuck) 3.dp else 0.dp,
-                    Modifier.animateItemPlacement(),
+                    Modifier.animateItem(),
                 ) {
                     Column {
                         Column(
@@ -121,7 +121,7 @@ fun MediaSelectorView(
                         state,
                         onClick = { onClickItem(item) },
                         Modifier
-                            .animateItemPlacement()
+                            .animateItem()
                             .fillMaxWidth(),
                     )
                     Row(Modifier.height(8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

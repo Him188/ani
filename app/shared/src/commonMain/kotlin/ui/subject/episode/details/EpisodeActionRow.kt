@@ -19,7 +19,6 @@ import androidx.compose.material.icons.rounded.DisplaySettings
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.InsertChartOutlined
 import androidx.compose.material.icons.rounded.Outbox
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -29,6 +28,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -207,7 +207,7 @@ private fun ActionButton(
             .clip(RoundedCornerShape(8.dp))
             .clickable(
                 remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false),
+                indication = ripple(bounded = false),
                 onClick = onClick,
             )
             .height(64.dp)

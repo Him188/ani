@@ -18,7 +18,6 @@
 
 package me.him188.ani.app.ui.subject.collection
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -37,16 +36,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +57,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.collectLatest
@@ -140,7 +138,7 @@ fun CollectionPage(
                                     val type = COLLECTION_TABS_SORTED[pagerState.currentPage]
                                     val collection = vm.collectionsByType(type)
                                     collection.isAutoRefreshing = false
-                                    collection.pullToRefreshState?.startRefresh()
+                                    collection.isRefreshing = true
 //                                val cache = collection.cache
 //                                
 //                                refreshTasker.launch {
@@ -154,13 +152,15 @@ fun CollectionPage(
                     },
                 )
 
-                SecondaryScrollableTabRow(
+                ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     indicator = @Composable { tabPositions ->
                         TabRowDefaults.SecondaryIndicator(
                             Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
                         )
                     },
+                    contentColor = TabRowDefaults.secondaryContentColor,
+                    containerColor = TabRowDefaults.secondaryContainerColor,
                     modifier = Modifier.fillMaxWidth().alpha(0.97f),
                 ) {
                     COLLECTION_TABS_SORTED.forEachIndexed { index, collectionType ->
@@ -199,11 +199,8 @@ fun CollectionPage(
             val collection = vm.collectionsByType(type)
 
             val pullToRefreshState = rememberPullToRefreshState()
-            SideEffect {
-                collection.pullToRefreshState = pullToRefreshState
-            }
             LaunchedEffect(true) {
-                snapshotFlow { pullToRefreshState.isRefreshing }.collectLatest {
+                snapshotFlow { collection.isRefreshing }.collectLatest {
                     if (!it) return@collectLatest
 
                     try {
@@ -218,7 +215,7 @@ fun CollectionPage(
                         throw e
                     } catch (_: Throwable) {
                     } finally {
-                        pullToRefreshState.endRefresh()
+                        collection.isRefreshing = false
                     }
                 }
             }
@@ -230,13 +227,27 @@ fun CollectionPage(
                         val lastUpdated = collection.cache.lastUpdated.first()
                         if (System.currentTimeMillis() - lastUpdated > 60.minutes.inWholeMilliseconds) {
                             collection.isAutoRefreshing = true
-                            pullToRefreshState.startRefresh()
+                            collection.isRefreshing = true
                         }
                     }
                 }
             }
 
-            Box(
+            PullToRefreshBox(
+                isRefreshing = collection.isRefreshing,
+                onRefresh = {
+                    collection.isAutoRefreshing = false
+                    collection.isRefreshing = true
+                },
+                indicator = {
+                    Indicator(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(topBarPaddings.calculateTopPadding()),
+                        isRefreshing = collection.isRefreshing,
+                        state = pullToRefreshState,
+                    )
+                },
                 modifier = Modifier.fillMaxSize(),
             ) {
                 TabContent(
@@ -251,16 +262,8 @@ fun CollectionPage(
                         start = 0.dp,
                         end = 0.dp,
                     ),
-                    modifier = Modifier
-                        .nestedScroll(pullToRefreshState.nestedScrollConnection)
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     enableAnimation = { vm.myCollectionsSettings.enableListAnimation },
-                )
-                PullToRefreshContainer(
-                    pullToRefreshState,
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(topBarPaddings.calculateTopPadding()),
                 )
             }
         }

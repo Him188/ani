@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -149,16 +150,18 @@ fun ProgressSlider(
                             thumbColor = MaterialTheme.colorScheme.primary,
                         ),
                         enabled = true,
-//                            thumbSize = DpSize(16.dp, 16.dp)
+                        thumbSize = DpSize(4.dp, 22.dp), // was 44.dp
                     )
                 },
                 track = {
                     SliderDefaults.Track(
                         it,
+                        Modifier.height(8.dp),
                         colors = SliderDefaults.colors(
                             inactiveTrackColor = MaterialTheme.colorScheme.background.weaken(),
                             activeTrackColor = MaterialTheme.colorScheme.onBackground.looming(),
                         ),
+                        thumbTrackGapSize = 3.dp,
                     )
                 },
                 onValueChangeFinished = {

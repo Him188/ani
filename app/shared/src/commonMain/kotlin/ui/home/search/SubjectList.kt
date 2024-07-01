@@ -39,12 +39,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -101,7 +101,7 @@ fun SubjectPreviewColumn(
                 title = subject.displayName,
                 imageUrl = remember(subject.id) { subject.imageCommon },
                 onClick = { navigator.navigateSubjectDetails(subject.id) },
-                Modifier.animateItemPlacement().height(180.dp),
+                Modifier.animateItem().height(180.dp),
             )
         }
 
@@ -153,7 +153,7 @@ fun SubjectPreviewCard(
             .fillMaxWidth()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(),
+                indication = ripple(),
                 onClick = onClick,
             ),
         shape = shape,

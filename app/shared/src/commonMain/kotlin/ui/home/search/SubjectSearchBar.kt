@@ -366,7 +366,7 @@ private fun SearchHistoryList(
                                 .clickable { onClickItem(history.id) }
                                 .padding(vertical = 12.dp)
                                 .padding(start = 16.dp, end = 8.dp)
-                                .animateItemPlacement(),
+                                .animateItem(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {

@@ -27,18 +27,18 @@ kompendium = "3.14.4"
 logback = "1.4.14"
 aws = "2.25.49"
 ksp = "2.0.0-1.0.21"
-room = "2.7.0-alpha03"
-sqlite = "2.5.0-alpha03"
+room = "2.7.0-alpha04"
+sqlite = "2.5.0-alpha04"
 constraintlayout-compose = "0.4.0"
 
 
-compose-material3 = "1.2.1"
+compose-material3 = "1.3.0-beta04"
 
 # https://androidx.tech/artifacts/compose.material/material-android/
-jetpack-compose = "1.6.7"
+jetpack-compose = "1.7.0-beta04"
 # https://github.com/JetBrains/compose-multiplatform/releases
 # https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-compatibility-and-versioning.html#use-a-developer-version-of-compose-multiplatform-compiler
-compose-multiplatform = "1.6.10"
+compose-multiplatform = "1.7.0-dev1703"
 # https://maven.pkg.jetbrains.space/public/p/compose/dev/org/jetbrains/compose/compiler/compiler/
 #compose-multiplatform-compiler = "1.5.11-kt-2.0.0-RC1" # used by buildscript, don't remove
 vlcj = "4.8.2" # don't change version, otherwise it might crash the vm

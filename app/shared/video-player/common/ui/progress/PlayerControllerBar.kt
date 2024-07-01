@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.OutlinedTextFieldDefaults.Container
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -267,11 +268,11 @@ object PlayerControllerDefaults {
                         leadingIcon = leadingIcon,
                         trailingIcon = trailingIcon,
                         container = {
-                            OutlinedTextFieldDefaults.ContainerBox(
-                                enabled,
-                                isError,
-                                interactionSource,
-                                colors,
+                            Container(
+                                enabled = enabled,
+                                isError = isError,
+                                interactionSource = interactionSource,
+                                colors = colors,
                                 shape = shape,
                             )
                         },

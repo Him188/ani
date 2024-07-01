@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.FloatingActionButton
@@ -42,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
@@ -122,7 +122,7 @@ abstract class TabBarScope<Tab> : RowScope {
                     .clip(RoundedCornerShape(8.dp))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = rememberRipple(),
+                        indication = ripple(),
                         onClick = { selectedTab.value = tab },
                     )
                     .width(72.dp)

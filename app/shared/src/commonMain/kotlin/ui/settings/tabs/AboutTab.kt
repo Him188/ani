@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,7 +19,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -114,11 +115,18 @@ fun AboutTab(
                         buildAnnotatedString {
                             pushStyle(style)
                             append("Ani 完全免费无广告且开源, 源代码可在 ")
-                            pushStyle(
-                                SpanStyle(
-                                    color = primaryColor,
-                                    textDecoration = TextDecoration.Underline,
-                                ),
+                            pushLink(
+                                LinkAnnotation.Url(
+                                    GITHUB_REPO,
+                                    TextLinkStyles(
+                                        SpanStyle(
+                                            color = primaryColor,
+                                            textDecoration = TextDecoration.Underline,
+                                        ),
+                                    ),
+                                ) {
+                                    vm.browserNavigator.openBrowser(context, GITHUB_REPO)
+                                },
                             )
                             append("GitHub")
                             pop()
@@ -128,12 +136,10 @@ fun AboutTab(
 
                     }
                 }
-                ClickableText(
+                Text(
                     text,
                     style = MaterialTheme.typography.bodyMedium,
-                ) {
-                    vm.browserNavigator.openBrowser(context, GITHUB_REPO)
-                }
+                )
             }
 
             Group(title = { Text("感谢你的支持") }) {
@@ -150,40 +156,65 @@ fun AboutTab(
                 Text("特别感谢:", style = MaterialTheme.typography.bodyMedium)
 
                 val listStyle = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.primary)
-                ClickableText(
-                    AnnotatedString("· Bangumi 番组计划"),
+                Text(
+                    buildAnnotatedString {
+                        pushLink(
+                            LinkAnnotation.Url(GITHUB_REPO, TextLinkStyles()) {
+                                vm.browserNavigator.openBrowser(context, GITHUB_REPO)
+                            },
+                        )
+                        append("· Bangumi 番组计划")
+                    },
                     style = listStyle,
-                ) {
-                    vm.browserNavigator.openBrowser(context, BANGUMI)
-                }
+                )
 
-                ClickableText(
-                    AnnotatedString("· Mikan 蜜柑计划"),
+                Text(
+                    buildAnnotatedString {
+                        pushLink(
+                            LinkAnnotation.Url(MIKAN, TextLinkStyles()) {
+                                vm.browserNavigator.openBrowser(context, MIKAN)
+                            },
+                        )
+                        append("· Mikan 蜜柑计划")
+                    },
                     style = listStyle,
-                ) {
-                    vm.browserNavigator.openBrowser(context, MIKAN)
-                }
+                )
 
-                ClickableText(
-                    AnnotatedString("· 動漫花園資源網"),
+                Text(
+                    buildAnnotatedString {
+                        pushLink(
+                            LinkAnnotation.Url(DMHY, TextLinkStyles()) {
+                                vm.browserNavigator.openBrowser(context, DMHY)
+                            },
+                        )
+                        append("· 動漫花園資源網")
+                    },
                     style = listStyle,
-                ) {
-                    vm.browserNavigator.openBrowser(context, DMHY)
-                }
+                )
 
-                ClickableText(
-                    AnnotatedString("· acg.rip"),
+                Text(
+                    buildAnnotatedString {
+                        pushLink(
+                            LinkAnnotation.Url(ACG_RIP, TextLinkStyles()) {
+                                vm.browserNavigator.openBrowser(context, ACG_RIP)
+                            },
+                        )
+                        append("· acg.rip")
+                    },
                     style = listStyle,
-                ) {
-                    vm.browserNavigator.openBrowser(context, ACG_RIP)
-                }
+                )
 
-                ClickableText(
-                    AnnotatedString("· 弹弹play"),
+                Text(
+                    buildAnnotatedString {
+                        pushLink(
+                            LinkAnnotation.Url(DANDANPLAY, TextLinkStyles()) {
+                                vm.browserNavigator.openBrowser(context, DANDANPLAY)
+                            },
+                        )
+                        append("· 弹弹play")
+                    },
                     style = listStyle,
-                ) {
-                    vm.browserNavigator.openBrowser(context, DANDANPLAY)
-                }
+                )
             }
         }
 
