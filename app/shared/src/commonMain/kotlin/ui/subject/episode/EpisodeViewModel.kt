@@ -69,6 +69,8 @@ import me.him188.ani.danmaku.api.DanmakuEvent
 import me.him188.ani.danmaku.api.DanmakuPresentation
 import me.him188.ani.danmaku.api.DanmakuSearchRequest
 import me.him188.ani.danmaku.api.DanmakuSession
+import me.him188.ani.danmaku.ui.DanmakuRegexFilterConfig
+import me.him188.ani.datasources.api.EpisodeSort
 import me.him188.ani.danmaku.api.emptyDanmakuCollection
 import me.him188.ani.datasources.api.Media
 import me.him188.ani.datasources.api.source.MediaFetchRequest
@@ -112,6 +114,7 @@ interface EpisodeViewModel : HasBackgroundScope {
      * "数据源" bottom sheet 中的每个数据源的结果
      */
     val mediaSourceResultsPresentation: MediaSourceResultsPresentation
+    val DanmakuRegexFilterConfig: Flow<DanmakuRegexFilterConfig>
 
     /**
      * "视频统计" bottom sheet 显示内容
@@ -272,6 +275,9 @@ private class EpisodeViewModelImpl(
             }
         }
 
+    override val DanmakuRegexFilterConfig: Flow<DanmakuRegexFilterConfig> =
+        settingsRepository.danmakuRegexFilterConfig.flow
+
     override val mediaSelectorPresentation: MediaSelectorPresentation =
         MediaSelectorPresentation(mediaSelector, backgroundScope.coroutineContext)
 
@@ -400,7 +406,10 @@ private class EpisodeViewModelImpl(
         }.shareInBackground(started = SharingStarted.Lazily)
 
     private val danmakuSessionFlow: Flow<DanmakuSession> = danmakuCollectionFlow.mapLatest { session ->
-        session.at(progress = playerState.currentPositionMillis.map { it.milliseconds })
+        session.at(
+            progress = playerState.currentPositionMillis.map { it.milliseconds },
+            danmakuRegexFilterConfig = DanmakuRegexFilterConfig,
+        )
     }.shareInBackground(started = SharingStarted.Lazily)
 
     private val danmakuEventFlow: Flow<DanmakuEvent> = danmakuSessionFlow.flatMapLatest { it.events }

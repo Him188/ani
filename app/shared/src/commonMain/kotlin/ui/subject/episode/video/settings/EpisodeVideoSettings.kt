@@ -30,6 +30,8 @@ import me.him188.ani.app.ui.settings.framework.AbstractSettingsViewModel
 import me.him188.ani.app.ui.settings.framework.components.SliderItem
 import me.him188.ani.app.ui.settings.framework.components.SwitchItem
 import me.him188.ani.danmaku.ui.DanmakuConfig
+import me.him188.ani.danmaku.ui.DanmakuRegexFilter
+import me.him188.ani.danmaku.ui.DanmakuRegexFilterConfig
 import me.him188.ani.danmaku.ui.DanmakuStyle
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -40,8 +42,16 @@ import kotlin.time.Duration.Companion.milliseconds
 interface EpisodeVideoSettingsViewModel {
     val danmakuConfig: DanmakuConfig
     val isLoading: Boolean
+    val danmakuRegexFilterConfig: DanmakuRegexFilterConfig
 
     fun setDanmakuConfig(config: DanmakuConfig)
+    fun addDanmakuRegexFilter(filter: DanmakuRegexFilter)
+    fun editDanmakuRegexFilter(filter: DanmakuRegexFilter)
+    fun removeDanmakuRegexFilter(filter: DanmakuRegexFilter)
+    
+    fun switchDanmakuRegexFilterCompletely()
+    
+    fun switchDanmakuRegexFilter(filter:DanmakuRegexFilter)
 }
 
 fun EpisodeVideoSettingsViewModel(): EpisodeVideoSettingsViewModel = EpisodeVideoSettingsViewModelImpl()
@@ -54,12 +64,73 @@ private class EpisodeVideoSettingsViewModelImpl : EpisodeVideoSettingsViewModel,
         settingsRepository.danmakuConfig,
         DanmakuConfig(_placeholder = -1),
     )
+    
+    val danmakuRegexFilterConfigSettings by settings(
+        settingsRepository.danmakuRegexFilterConfig,
+        DanmakuRegexFilterConfig(_placeholder = -1)
+    )
 
     override val danmakuConfig: DanmakuConfig by danmakuConfigSettings
+    override val danmakuRegexFilterConfig: DanmakuRegexFilterConfig by danmakuRegexFilterConfigSettings
     override val isLoading: Boolean get() = danmakuConfigSettings.loading
 
     override fun setDanmakuConfig(config: DanmakuConfig) {
         danmakuConfigSettings.updateDebounced(config, 100.milliseconds)
+    }
+
+    override fun addDanmakuRegexFilter(filter: DanmakuRegexFilter) {
+        danmakuRegexFilterConfigSettings.update(
+            danmakuRegexFilterConfig.copy(
+                danmakuRegexFilterList = danmakuRegexFilterConfig.danmakuRegexFilterList.toMutableList().apply {
+                    add(filter)
+                }
+            )
+        )
+    }
+    
+    override fun editDanmakuRegexFilter(filter: DanmakuRegexFilter) {
+        danmakuRegexFilterConfigSettings.update(
+            danmakuRegexFilterConfig.copy(
+                danmakuRegexFilterList = danmakuRegexFilterConfig.danmakuRegexFilterList.toMutableList().apply {
+                    val index = indexOfFirst { it.instanceID == filter.instanceID }
+                    if (index != -1) {
+                        set(index, filter)
+                    }
+                }
+            )
+        )
+    }
+    
+    override fun removeDanmakuRegexFilter(filter: DanmakuRegexFilter) {
+        danmakuRegexFilterConfigSettings.update(
+            danmakuRegexFilterConfig.copy(
+                danmakuRegexFilterList = danmakuRegexFilterConfig.danmakuRegexFilterList.toMutableList().apply {
+                    removeIf { it.instanceID == filter.instanceID }
+                }
+            )
+        )
+    }
+    
+    override fun switchDanmakuRegexFilterCompletely() {
+        danmakuRegexFilterConfigSettings.update(
+            danmakuRegexFilterConfig.copy(
+                enabled = !danmakuRegexFilterConfig.enabled,
+            ),
+        )
+    }
+
+    // turn off a particular filter
+    override fun switchDanmakuRegexFilter(filter: DanmakuRegexFilter) {
+        danmakuRegexFilterConfigSettings.update(
+            danmakuRegexFilterConfig.copy(
+                danmakuRegexFilterList = danmakuRegexFilterConfig.danmakuRegexFilterList.toMutableList().apply {
+                    val index = indexOfFirst { it.instanceID == filter.instanceID }
+                    if (index != -1) {
+                        set(index, filter.copy(isEnabled = !filter.isEnabled))
+                    }
+                }
+            )
+        )
     }
 }
 
@@ -70,8 +141,24 @@ fun EpisodeVideoSettings(
 ) {
     return EpisodeVideoSettings(
         danmakuConfig = vm.danmakuConfig,
+        danmakuRegexFilterConfig = vm.danmakuRegexFilterConfig,
         setDanmakuConfig = remember(vm) {
             vm::setDanmakuConfig
+        },
+        addDanmakuRegexFilter = remember(vm) {
+            vm::addDanmakuRegexFilter
+        },
+        editDanmakuRegexFilter = remember(vm) {
+            vm::editDanmakuRegexFilter
+        },
+        removeDanmakuRegexFilter = remember(vm) {
+            vm::removeDanmakuRegexFilter
+        },
+        switchDanmakuRegexFilterCompletely = remember(vm) {
+            vm::switchDanmakuRegexFilterCompletely
+        },
+        switchDanmakuRegexFilter = remember(vm) {
+            vm::switchDanmakuRegexFilter
         },
         isLoading = remember(vm) {
             { vm.isLoading }
@@ -86,7 +173,13 @@ private val LOADING_FALSE = { false }
 @Composable
 fun EpisodeVideoSettings(
     danmakuConfig: DanmakuConfig,
+    danmakuRegexFilterConfig: DanmakuRegexFilterConfig,
     setDanmakuConfig: (config: DanmakuConfig) -> Unit,
+    addDanmakuRegexFilter: (filter: DanmakuRegexFilter) -> Unit,
+    editDanmakuRegexFilter: (filter: DanmakuRegexFilter) -> Unit,
+    removeDanmakuRegexFilter: (filter: DanmakuRegexFilter) -> Unit,
+    switchDanmakuRegexFilterCompletely: () -> Unit,
+    switchDanmakuRegexFilter: (filter: DanmakuRegexFilter) -> Unit,
     isLoading: () -> Boolean = LOADING_FALSE,
     modifier: Modifier = Modifier,
 ) {
@@ -325,6 +418,24 @@ fun EpisodeVideoSettings(
                     }
                 },
                 modifier = Modifier.placeholder(isLoadingState),
+            )
+
+            SwitchItem(
+                danmakuRegexFilterConfig.enabled,
+                onCheckedChange = {
+                        switchDanmakuRegexFilterCompletely()
+                },
+                title = { Text("弹幕正则过滤") },
+                modifier = Modifier.placeholder(isLoadingState),
+            )
+            
+            DanmakuRegexFilterGroup(
+                danmakuRegexFilterConfig,
+                addDanmakuRegexFilter,
+                editDanmakuRegexFilter,
+                removeDanmakuRegexFilter,
+                switchDanmakuRegexFilter,
+                isLoadingState
             )
 
             if (currentAniBuildConfig.isDebug) {

@@ -4,12 +4,14 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import me.him188.ani.danmaku.protocol.DanmakuInfo
+import me.him188.ani.danmaku.ui.DanmakuRegexFilterConfig
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
@@ -29,7 +31,7 @@ interface DanmakuCollection {
      *
      * 当 [progress] [完结][Flow.onCompletion] 时, 本函数返回的 flow 也会 [完结][Flow.onCompletion].
      */
-    fun at(progress: Flow<Duration>): DanmakuSession
+    fun at(progress: Flow<Duration>, danmakuRegexFilterConfig: Flow<DanmakuRegexFilterConfig>): DanmakuSession
 }
 
 sealed class DanmakuEvent {
@@ -46,20 +48,19 @@ sealed class DanmakuEvent {
 
 fun emptyDanmakuCollection(): DanmakuCollection {
     return object : DanmakuCollection {
-        override fun at(progress: Flow<Duration>): DanmakuSession = emptyDanmakuSession()
+        override fun at(progress: Flow<Duration>, danmakuRegexFilterConfig: Flow<DanmakuRegexFilterConfig>): DanmakuSession = emptyDanmakuSession()
     }
 }
 
 class TimeBasedDanmakuSession private constructor(
     /**
-     * List of danmaku. Must be sorted by [DanmakuInfo.playTime], and must not change after construction.
+     * 一个[Danmaku] list. 必须根据[DanmakuInfo.playTime]排序且创建后不可更改，是一条动漫完整的弹幕列表.
      */
     private val list: List<Danmaku>,
     private val shiftMillis: Long = 0,
     private val flowCoroutineContext: CoroutineContext = EmptyCoroutineContext,
 ) : DanmakuCollection {
     override val totalCount: Flow<Int?> = flowOf(list.size)
-
     companion object {
         fun create(
             sequence: Sequence<Danmaku>,
@@ -74,7 +75,32 @@ class TimeBasedDanmakuSession private constructor(
         }
     }
 
-    override fun at(progress: Flow<Duration>): DanmakuSession {
+
+    /**
+     * 输入一个[Danmaku] list. 和一个[DanmakuRegexFilterConfig]，返回一个过滤后的[Danmaku] list
+     */
+    fun filterList(list: List<Danmaku>, danmakuRegexFilterConfig: DanmakuRegexFilterConfig): List<Danmaku> {
+        if (!danmakuRegexFilterConfig.enabled) {
+            return list
+        }
+
+        // 预编译所有启用的正则表达式 
+        val regexFilters = danmakuRegexFilterConfig.danmakuRegexFilterList
+            .filter { it.isEnabled }
+            .map { Regex(it.re) }
+
+        return list.filter { danmaku ->
+            !regexFilters.any { regex ->
+                danmaku.text.matches(regex)
+            }
+        }
+    }
+
+
+    /**
+     * 接收一个视频的播放进度[Duration]. 和一个[DanmakuRegexFilterConfig]，根据视频进度和过滤后的弹幕列表，通过call [DanmakuSessionAlgorithm] 的 [tick] 函数发送弹幕
+     */
+    override fun at(progress: Flow<Duration>, danmakuRegexFilterConfig: Flow<DanmakuRegexFilterConfig>): DanmakuSession {
         if (list.isEmpty()) {
             return emptyDanmakuSession() // fast path
         }
@@ -87,16 +113,27 @@ class TimeBasedDanmakuSession private constructor(
         val algorithm = DanmakuSessionAlgorithm(state)
         return object : DanmakuSession {
             override val events: Flow<DanmakuEvent> = channelFlow {
-                // 一个单独协程收集当前进度
+                launch {
+                    danmakuRegexFilterConfig.distinctUntilChanged().collect { config ->
+                        val filteredList = filterList(list, config)
+                        state.updateList(filteredList)
+                        state.requestRepopulate()
+                    }
+                }
+
+                // 一个单独协程收集当前进度和过滤配置
                 launch(start = CoroutineStart.UNDISPATCHED) {
+
                     progress.collect {
                         state.curTimeShared = it
+//                        println("Current time shared: $it")
                     }
                     // progress finished, no need to calculate
                     this@channelFlow.channel.close()
                 }
 
                 val sendItem: (DanmakuEvent) -> Boolean = {
+//                    println("Sending item: $it")
                     trySend(it).isSuccess
                 }
 
@@ -153,7 +190,8 @@ class TimeBasedDanmakuSession private constructor(
 }
 
 internal class DanmakuSessionFlowState(
-    val list: List<Danmaku>,
+    @Volatile
+    var list: List<Danmaku>,
     /**
      * 每当快进/快退超过这个阈值后, 重新装填整个屏幕弹幕
      */
@@ -187,6 +225,10 @@ internal class DanmakuSessionFlowState(
      */
     fun requestRepopulate() {
         lastTime = Duration.INFINITE
+    }
+    
+    fun updateList(newList: List<Danmaku>) {
+        list = newList
     }
 }
 

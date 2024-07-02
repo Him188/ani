@@ -1,11 +1,6 @@
 package me.him188.ani.app.ui.subject.episode.video.settings
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.him188.ani.app.ui.foundation.ProvideCompositionLocalsForPreview
-import me.him188.ani.danmaku.ui.DanmakuConfig
+import me.him188.ani.app.ui.foundation.rememberViewModel
 
 @Preview
 @Composable
@@ -50,17 +45,9 @@ private fun PreviewEpisodeVideoSettingsSideSheet() = ProvideCompositionLocalsFor
     if (showSettings) {
         EpisodeVideoSettingsSideSheet(
             onDismissRequest = { showSettings = false },
-            title = { Text(text = "弹幕设置") },
-            closeButton = {
-                IconButton(onClick = {}) {
-                    Icon(Icons.Rounded.Close, contentDescription = "关闭")
-                }
-            },
         ) {
             EpisodeVideoSettings(
-                DanmakuConfig(),
-                setDanmakuConfig = {},
-                isLoading = { false },
+                rememberViewModel { EpisodeVideoSettingsViewModel() },
                 Modifier.padding(8.dp),
             )
         }
